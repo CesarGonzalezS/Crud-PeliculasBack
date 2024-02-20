@@ -22,11 +22,6 @@
         @Autowired
         GenresService genresService;
 
-
-
-
-
-
         @GetMapping("/movies")
         public List<Movies> getMovies() {
             return moviesService.getAllMovies();
@@ -43,15 +38,21 @@
         }
 
         // Método para eliminar una película por su nombre
-        @DeleteMapping("/movies/{name}")
-        public String deleteMovieByName(@PathVariable String name) {
-            Movies movie = moviesService.getName(name);
-            if (movie == null) {
-                return "Movie with name " + name + " not found";
+
+        @DeleteMapping("/movies/Delete/{name}")
+        public String deleteMovieByName(@RequestBody String name) {
+            try {
+                Movies movie = (Movies) moviesService.getMoviesByName(name);
+                if (movie == null) {
+                    return "Movie with name " + name + " not found";
+                }
+                moviesService.deleteMovie(movie.getId());
+                return "Movie with name " + name + " deleted";
+            } catch (Exception e) {
+                return "Error deleting movie: " + e.getMessage();
             }
-            moviesService.deleteMovie(movie.getId());
-            return "Movie with name " + name + " deleted";
         }
+
 
 
         @PutMapping("/movies/{id}")
@@ -67,33 +68,20 @@
 
         @PostMapping("/registermovies")
         public Movies addMovie(@RequestBody Map<String, Object> movieData) {
-            System.out.println(movieData);
             try {
-                System.out.println(movieData.get("name"));
-                System.out.println(movieData.get("genre"));
-                System.out.println(movieData.get("year"));
-                System.out.println(movieData.get("image"));
-
+                String description = (String) movieData.get("description");
+                String director = (String) movieData.get("director");
+                String base64Image = (String) movieData.get("image");
                 String name = (String) movieData.get("name");
-                // Obtener los datos del género del mapa y crear una instancia de Genre
+                int year = Integer.parseInt((String) movieData.get("year"));
                 Map<String, Object> genreData = (Map<String, Object>) movieData.get("genre");
                 Genre genre = new Genre((Integer) genreData.get("id"), (String) genreData.get("name"));
 
-                int year = Integer.parseInt((String) movieData.get("year"));
-                byte[] image = Base64.getDecoder().decode((String) movieData.get("image"));
+                Movies movie = new Movies(description, director, base64Image, name, year, genre);
 
-                // Convierte la imagen a Base64 si es necesario
-                String base64Image = Base64.getEncoder().encodeToString(image);
-
-                // Crea una nueva instancia de Movies
-                Movies movie = new Movies(name, genre, year, base64Image);
-                System.out.println(movie);
-
-                // Guarda la película en la base de datos utilizando el servicio
                 return moviesService.saveMovie(movie);
-
             } catch (Exception e) {
-                e.printStackTrace(); // Esto imprimirá el rastreo de la pila en la consola del servidor
+                e.printStackTrace();
                 throw new RuntimeException("Error al guardar la película: " + e.getMessage());
             }
         }

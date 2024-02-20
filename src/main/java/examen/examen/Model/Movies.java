@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.Arrays;
+import java.util.Date;
 
 @Entity
 public class Movies {
@@ -15,26 +16,30 @@ public class Movies {
     @ManyToOne
     private Genre genre;
     private int year;
+    private String director;
+
+    @Temporal(TemporalType.DATE)
+    private Date releaseDate;
+
+    @Column(columnDefinition = "TEXT") // Ajusta el tipo de columna según tus necesidades
+    private String description;
 
     @Column(columnDefinition = "LONGTEXT")
     private String imageBase64;
 
 
-    @JsonCreator
-    public Movies(@JsonProperty("name") String name,
-                  @JsonProperty("genre") Genre genre,
-                  @JsonProperty("year") int year,
-                  @JsonProperty("imageBase64") String imageBase64) {
-        this.name = name;
-        this.genre = genre;
-        this.year = year;
-        this.imageBase64 = imageBase64;
-    }
-
     public Movies() {
 
     }
 
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
 
     public int getId() {
         return id;
@@ -77,19 +82,38 @@ public class Movies {
         this.imageBase64 = imageBase64;
     }
 
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @JsonCreator
-    public Movies(@JsonProperty("name") String name,
-                  @JsonProperty("genre") Genre genre,
+    public Movies(@JsonProperty("description") String description,
+                  @JsonProperty("director") String director,
+                  @JsonProperty("imageBase64") String imageBase64,
+                  @JsonProperty("name") String name,
                   @JsonProperty("year") int year,
-                  @JsonProperty("image") byte[] image,
-                  @JsonProperty("imageBase64") String imageBase64) {
-        this.name = name;
-        this.genre = genre;
-        this.year = year;
-
+                  @JsonProperty("genre") Genre genre) {
+        this.description = description;
+        this.director = director;
         this.imageBase64 = imageBase64;
+        this.name = name;
+        this.year = year;
+        this.genre = genre;
     }
+
+
 
 
     @Override
@@ -99,6 +123,8 @@ public class Movies {
                 ", name='" + name + '\'' +
                 ", genre=" + genre +
                 ", year=" + year +
+                ", director='" + director + '\'' +
+                ", description='" + description + '\'' +
                 ", imageBase64='" + imageBase64 + '\'' +
                 '}';
     }
